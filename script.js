@@ -538,6 +538,8 @@ async function summarize() {
    - Highlight connections with other services that might have impacted the problematic services.
    - Provide specific recommendations based on the current data provided.
 
+**Important:** Ensure that all incident counts are rounded up to the nearest whole number before presenting them.
+
 Include both incident data and network data in your analysis.
 
 Present the information concisely using bullet points under each section. Ensure that the summary is directly based on the data provided and is actionable.`;
@@ -618,7 +620,11 @@ async function answerQuestion() {
   const system = `As an expert analyst in financial application's incident management,
 answer the user's question based on the data provided.
 Provide examples from both the incident data and network data to support your answer.
-Present the information concisely and ensure that the answer is directly based on the data provided and is actionable.`;
+Present the information concisely and ensure that the answer is directly based on the data provided and is actionable.
+
+**Important:** Ensure that all incident counts are rounded up to the nearest whole number before presenting them.
+
+`;
 
   // Prepare the message with user's question and data summary
   let message = `User Question:\n${userQuestion}\n\nData Summary:\n`;
