@@ -354,7 +354,7 @@ function drawSankey() {
   // Style text labels
   graph.texts
     .attr("fill", "black")
-    .attr("font-size", "15px");;
+    .attr("font-size", "10px");;
   colorSankey();
 }
 
