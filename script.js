@@ -333,7 +333,7 @@ function drawSankey() {
     labelWidth: 100,
     categories: ["Shift", "Region", "Team Acro", "Service"],
     size: (d) => d.Count,
-    text: (d) => (d.key.length * 6 < d.width ? d.key : null),
+    text: (d) => (d.key.length * 9 < d.width ? d.key : null),
     d3,
   });
   graphs.sankey = graph;
