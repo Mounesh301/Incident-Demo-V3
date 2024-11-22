@@ -1,0 +1,172 @@
+Source,Target
+GRT,VaR
+GRT,Murex
+GRT,K2
+Anvil,K2
+Anvil,Anvil 9
+Anvil 9,Anvil
+Argos,Colline
+Argos,K2
+ARROW,Anvil
+Brokerage Processing System,PrimeOne
+Brokerage Processing System,LoanOne
+CENTRAL SECURITY MASTER DATABASE,Trade Central
+CENTRAL SECURITY MASTER DATABASE,K2
+Centralized Risk Platform,ION-RISC
+Centralized Risk Platform,TARDIS
+Centralized Risk Platform,K2
+Centralized Risk Platform,IM Calculator
+Cerberus,K2
+Citrix - London,GLOSS
+Client Analytics Reporting,LIQ
+Client Central,Trade Central
+Client Central,Autosys
+Client Central,PrimeOne
+Colline,FIENY
+Colline,Anvil
+Colline,IMPACT
+Colline,K2
+Confirmation Utility Hub,eScape
+Confirmation Utility Hub,K2
+CTR,Lancelot
+CTR,Cerberus
+CTR,Murex
+CTR,LOGAN
+CTR,Encore
+CTR,OPICS
+CTR,Icarus
+CTR,VaR
+CTR,GLOSS
+CTR,IMPACT
+CTR,K2
+CRK Platform_,Mintter
+CSM 2.0,K2
+Data Center Network Services,GRT
+Data Center Network Services,TARDIS
+Data Center Network Services,LoanOne
+Data Center Network Services,IM Calculator
+DMS Staging,Document Management System
+Enterprise Wireroom Platform,GLOSS
+Enterprise Wireroom Platform,TLM
+Equilend/NGT,Prime Services
+Equilend/NGT,LoanOne
+eScape,K2
+FI Anvil,Anvil
+FIDESSA- European Equity Trading Platform,Client Central
+FIENY,Anvil
+Financial and Client Trading Metrics Service,K2
+FRDP Landing Zone & Pre-Staging,TLM
+FRDP Landing Zone & Pre-Staging,K2
+Future Straight Through Processing - FSTP,ION-RISC
+Future Straight Through Processing - FSTP,Lancelot
+GBM Murex,Murex
+GBP Datamart,ISL - Liquidity Extraction
+GTS Samba Servers,K2
+HOTSCAN,TLM
+IM Calculator,Margin Common
+IM Calculator,Colline
+IM Calculator,K2
+IMPACT,FIETOR
+IMPACT,FIENY
+Integrated Payment Hub,Settlement Workflow Engine
+ION-RISC,Kx Regulatory Reporting
+ION-RISC,Lancelot
+ION-RISC,TLM
+K2,TenX
+K2,ART
+K2,Colline
+K2,Murex
+K2,TARDIS
+K2,Argos
+K2,TLM
+K2,Icarus
+K2,Margin Common
+Lancelot,VaR
+Lancelot,K2
+LDAP,Anvil
+LDAP,K2
+Liquidity Risk Data Capture,GLOSS
+Liquidity Risk Data Capture,IMPACT
+LIQ,TLM
+LIQ Scotia Integration Layer,TLM
+LIQ Scotia Integration Layer,LIQ
+LoanOne,TLM
+LOGAN,VaR
+LOGAN,Anvil
+LOGAN,K2
+Margin Common,K2
+MMI - Europe and Asia,ART
+MMI - Europe and Asia,Anvil
+MMI - Europe and Asia,K2
+MMI - Europe and Asia,Anvil 9
+MMI- New York,Murex
+MMI- New York,Anvil 9
+MMI- New York,Celer
+MMI- New York,Anvil
+MMI- New York,PrimeOne
+MMI- New York,LoanOne
+MMI- Toronto,ART
+MMI- Toronto,Trading Technologies
+Murex,K2
+Oracle FAH-EBSGL,TLM
+Oracle FAH-EBSGL,Autosys
+Oracle FAH-EBSGL,TARDIS
+Oracle Financials Accounting Hub,TLM
+Oracle OFSAA,Autosys
+Oracle OFSAA,TLM
+Payments - BESS,TLM
+PXV,ART
+PXV,TenX
+PXV,Colline
+PXV,TARDIS
+PXV,Beacon
+PXV,Margin Common
+PXV,K2
+PeopleSoft Thick Ledger,TLM
+Postedge,ART
+Postedge,Prime Services
+Prime Services,K2
+Prime Services,PrimeOne
+Prime Services,LoanOne
+Prime Services Data Interface,Prime Services
+RegTek,TLM
+RWH,Prime Services
+RWH,Murex
+RWH,TARDIS
+RWH,ION-RISC
+RWH,IMPACT
+RWH,K2
+Robotics Code Container,HOTSCAN
+SCOTIA COMMODITY TRADING SYSTEM,Colline
+SCOTIA COMMODITY TRADING SYSTEM,TARDIS
+SCOTIA COMMODITY TRADING SYSTEM,K2
+Scotia Investor Solutions,Icarus
+ServiceNow,ART
+SMG - ScotiaMocatta Gateway,Murex
+Storage Area Network,Oracle Financials Accounting Hub
+TARDIS,Lancelot
+TARDIS,LOGAN
+TARDIS,ION-RISC
+TARDIS,Anvil
+TARDIS,K2
+TenX,LDAP
+THOR - NPV/GL Application,TLM
+TLM,CTR
+TLM,OPICS
+TLM,LIQ
+TLM,GLOSS
+TLM,IMPACT
+Trade Central,K2
+Trade Central,Autosys
+Trade Central,IMPACT
+Trade Central,LIQ
+Trading Apps Locates Provider,Equilend/NGT
+VaR,LOGAN
+VaR,Anvil
+VaR,K2
+XVA Platform,ART
+XVA Platform,Colline
+XVA Platform,K2
+ZEUS,eScape
+ZEUS,GLOSS
+ZEUS,K2
