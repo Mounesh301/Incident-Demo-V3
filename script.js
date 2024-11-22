@@ -324,7 +324,6 @@ function filteredIncidents() {
   );
 }
 
-
 // Function to draw the Sankey diagram
 function drawSankey() {
   const incidents = filteredIncidents();
@@ -399,7 +398,7 @@ $threshold.addEventListener("input", () => {
 
 // Function to draw the network graph
 function drawNetwork() {
-  const incidents = data.incidents;
+  const incidents = filteredIncidents();
 
   // Calculate service statistics
   const serviceStats = d3.rollup(
@@ -447,7 +446,7 @@ function drawNetwork() {
     .attr("stroke-width", 1)     
     .attr("r", (d) => rScale(d.Count))
     .attr("data-bs-toggle", "tooltip")
-    .attr("title", (d) => `${d.value}: ${num2(d.Hours)} hours, ${num0(d.Count)} incidents`);
+    .attr("title", (d) => `${d.value}: ${num2(d.Hours)} hours, ${num0(Math.ceil(d.Count))} incidents`); // Applied Math.ceil here
 
   // Style links
   graph.links
@@ -627,9 +626,9 @@ Present the information concisely and ensure that the answer is directly based o
   // Include overall statistics
   const overallStats = computeStats(incidents, "Service");
   overallStats.forEach((stat) => {
-    message += `- Service ${stat.Service}: ${stat.Count} incidents, Avg Duration: ${num2(
+    message += `- Service ${stat.Service}: ${num0(Math.ceil(stat.Count))} incidents, Avg Duration: ${num2(
       stat.AvgHours
-    )} hours\n`;
+    )} hours\n`; // Applied Math.ceil here
   });
 
   // Include network data summary
@@ -686,14 +685,14 @@ function computeStats(dataArray, groupByKey) {
     .rollups(
       dataArray,
       (v) => ({
-        Count: d3.sum(v, (d) => d.Count),
+        Count: Math.ceil(d3.sum(v, (d) => d.Count)), // Applied Math.ceil here
         Hours: d3.sum(v, (d) => d.Hours * d.Count),
       }),
       (d) => d[groupByKey]
     )
     .map(([key, stats]) => ({
       [groupByKey]: key,
-      Count: stats.Count,
+      Count: stats.Count, // Already ceil'd
       AvgHours: stats.Hours / stats.Count,
     }));
 }
@@ -706,7 +705,9 @@ function formatTopStats(title, statsArray, keyName) {
   result += topStats
     .map(
       (item) =>
-        `  ${item[keyName]}: ${num0(item.Count)} incidents (Avg ${num2(item.AvgHours)} hrs)`
+        `  ${item[keyName]}: ${num0(Math.ceil(item.Count))} incidents (Avg ${num2(
+          item.AvgHours
+        )} hrs)` // Applied Math.ceil here
     )
     .join("\n");
   return result + "\n\n";
@@ -726,9 +727,9 @@ function formatServiceStats(data) {
       result += topShifts
         .map(
           (shift) =>
-            `    ${shift.Shift}: ${num0(shift.Count)} incidents (Avg ${num2(
+            `    ${shift.Shift}: ${num0(Math.ceil(shift.Count))} incidents (Avg ${num2(
               shift.AvgHours
-            )} hrs)`
+            )} hrs)` // Applied Math.ceil here
         )
         .join("\n");
       result += "\n";
@@ -738,9 +739,9 @@ function formatServiceStats(data) {
       result += topTimesOfDay
         .map(
           (time) =>
-            `    ${time.TimeOfDay}: ${num0(time.Count)} incidents (Avg ${num2(
+            `    ${time.TimeOfDay}: ${num0(Math.ceil(time.Count))} incidents (Avg ${num2(
               time.AvgHours
-            )} hrs)`
+            )} hrs)` // Applied Math.ceil here
         )
         .join("\n");
       result += "\n";
@@ -754,9 +755,9 @@ function formatServiceStats(data) {
     result += topRegions
       .map(
         (Region) =>
-          `  ${Region.Region}: ${num0(Region.Count)} incidents (Avg ${num2(
+          `  ${Region.Region}: ${num0(Math.ceil(Region.Count))} incidents (Avg ${num2(
             Region.AvgHours
-          )} hrs)`
+          )} hrs)` // Applied Math.ceil here
       )
       .join("\n");
     result += "\n";
@@ -769,9 +770,9 @@ function formatServiceStats(data) {
     result += topTeams
       .map(
         (team) =>
-          `  ${team.Team}: ${num0(team.Count)} incidents (Avg ${num2(
+          `  ${team.Team}: ${num0(Math.ceil(team.Count))} incidents (Avg ${num2(
             team.AvgHours
-          )} hrs)`
+          )} hrs)` // Applied Math.ceil here
       )
       .join("\n");
     result += "\n";
@@ -781,7 +782,7 @@ function formatServiceStats(data) {
   if (data.descriptionStats.length > 0) {
     result += `- Frequent issues:\n`;
     result += data.descriptionStats
-      .map((desc) => `  ${desc.Description}: ${num0(desc.Count)} occurrences`)
+      .map((desc) => `  ${desc.Description}: ${num0(Math.ceil(desc.Count))} occurrences`) // Applied Math.ceil here
       .join("\n");
     result += "\n";
   }
