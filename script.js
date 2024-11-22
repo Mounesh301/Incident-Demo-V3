@@ -352,7 +352,9 @@ function drawSankey() {
     .attr("title", (d) => `${d.source.key} - ${d.target.key}: ${num2(d.Hours)} hours`);
 
   // Style text labels
-  graph.texts.attr("fill", "black");
+  graph.texts
+    .attr("fill", "black")
+    .attr("font-size", "15px");;
   colorSankey();
 }
 
