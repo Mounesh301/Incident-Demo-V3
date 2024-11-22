@@ -825,3 +825,4 @@ function prepareNetworkSummary(selectedServices) {
 
   return summary;
 }
+
