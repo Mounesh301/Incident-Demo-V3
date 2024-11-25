@@ -8,31 +8,33 @@ import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@1";
 
 // Get references to DOM elements
-const $upload = document.getElementById("upload");
-const $filters = document.getElementById("filters");
-const $result = document.getElementById("result");
-const $showLinks = document.getElementById("show-links");
-const $threshold = document.getElementById("threshold");
-const $thresholdDisplay = document.getElementById("threshold-display");
-const $sankey = document.getElementById("sankey");
-const $network = document.getElementById("network");
-const $summarize = document.getElementById("summarize");
-const $summary = document.getElementById("summary");
-const $userQuestion = document.getElementById("user-question");
-const $askQuestion = document.getElementById("ask-question");
-const $resetFilters = document.getElementById("reset-filters");
+const $elements = {
+  upload: document.getElementById("upload"),
+  filters: document.getElementById("filters"),
+  result: document.getElementById("result"),
+  showLinks: document.getElementById("show-links"),
+  threshold: document.getElementById("threshold"),
+  thresholdDisplay: document.getElementById("threshold-display"),
+  sankey: document.getElementById("sankey"),
+  network: document.getElementById("network"),
+  summarize: document.getElementById("summarize"),
+  summary: document.getElementById("summary"),
+  userQuestion: document.getElementById("user-question"),
+  askQuestion: document.getElementById("ask-question"),
+  resetFilters: document.getElementById("reset-filters"),
+};
 
 // Initialize variables and constants
 const data = {};
 const graphs = {};
 const minDuration = 0;
 const maxDuration = 10;
-let threshold = parseFloat($threshold.value) || 3;
+let threshold = parseFloat($elements.threshold.value) || 3;
 let colorScale;
 const marked = new Marked();
 const filters = {};
 
-// Constants for filters and pre-selected services and Regions
+// Constants for filters and pre-selected services and regions
 const filterKeys = ["Region", "Shift", "Team", "Service"];
 const preSelectedServices = [
   "CTR",
@@ -47,7 +49,15 @@ const preSelectedServices = [
   "K2",
   "TARDIS",
 ];
-const preSelectedRegions = ["Canada", "Ireland", "USA", "UK", "Global", "Singapore", "LATAM"];
+const preSelectedRegions = [
+  "Canada",
+  "Ireland",
+  "USA",
+  "UK",
+  "Global",
+  "Singapore",
+  "LATAM",
+];
 
 // Function to read and parse CSV files
 async function readCSV(file) {
@@ -58,9 +68,8 @@ async function readCSV(file) {
 
     // Split 'Incident Data' into separate fields if it exists
     if (row["Incident Data"]) {
-      const [Incident, DescriptionCleaned, ImpactCleaned, ResolutionDetails] = row[
-        "Incident Data"
-      ].split("|");
+      const [Incident, DescriptionCleaned, ImpactCleaned, ResolutionDetails] =
+        row["Incident Data"].split("|");
       Object.assign(row, { Incident, DescriptionCleaned, ImpactCleaned, ResolutionDetails });
     }
 
@@ -72,7 +81,7 @@ async function readCSV(file) {
 }
 
 // Event listener for file uploads
-$upload.addEventListener("change", async (e) => {
+$elements.upload.addEventListener("change", async (e) => {
   const name = e.target.getAttribute("name");
   data[name] = await readCSV(e.target.files[0]);
   draw();
@@ -81,7 +90,7 @@ $upload.addEventListener("change", async (e) => {
 // Main function to initialize the application after data is loaded
 function draw() {
   if (!data.incidents) return;
-  $result.classList.remove("d-none");
+  $elements.result.classList.remove("d-none");
   initializeFilters();
   drawFilters();
   update();
@@ -96,25 +105,22 @@ function update() {
 
 // Function to initialize filters to default values
 function initializeFilters() {
-  for (const key of filterKeys) {
+  filterKeys.forEach((key) => {
     const values = [...new Set(data.incidents.map((d) => d[key]))].sort();
-    filters[key] = values.map((v, index) => ({
+    filters[key] = values.map((v) => ({
       value: v,
       selected:
         key === "Service"
           ? preSelectedServices.includes(v)
           : key === "Region"
           ? preSelectedRegions.includes(v)
-          : key === "Team"
-          ? false
-          : true,
-      index,
+          : key !== "Team",
     }));
-  }
+  });
 }
 
 // Event listener for resetting filters
-$resetFilters.addEventListener("click", resetFilters);
+$elements.resetFilters.addEventListener("click", resetFilters);
 
 // Function to reset filters and update visualizations
 function resetFilters() {
@@ -126,7 +132,7 @@ function resetFilters() {
 // Function to draw filter dropdowns
 function drawFilters() {
   // Generate HTML for filter dropdowns
-  $filters.innerHTML = filterKeys
+  $elements.filters.innerHTML = filterKeys
     .map(
       (key) => `
       <div class="col-md-3">
@@ -140,8 +146,8 @@ function drawFilters() {
             </div>
             <div class="dropdown-item">
               <input type="checkbox" class="select-all" id="all-${key}" ${
-        key !== "Service" && key !== "Team" && key !== "Region" ? "checked" : ""
-      }>
+          key !== "Service" && key !== "Team" && key !== "Region" ? "checked" : ""
+        }>
               <label for="all-${key}" class="flex-grow-1">Select All</label>
             </div>
             ${
@@ -165,9 +171,7 @@ function drawFilters() {
     .join("");
 
   // Render options for each filter
-  for (const key of filterKeys) {
-    renderFilterOptions(key);
-  }
+  filterKeys.forEach(renderFilterOptions);
 
   // Add event listeners to filter components
   addFilterEventListeners();
@@ -182,10 +186,10 @@ function renderFilterOptions(key) {
   const options = filters[key];
 
   // Sort options: selected at the top, then unselected
-  options.sort((a, b) => b.selected - a.selected || a.index - b.index);
+  options.sort((a, b) => b.selected - a.selected || a.value.localeCompare(b.value));
 
   // Generate HTML for each option
-  const optionsHTML = options
+  optionsContainer.innerHTML = options
     .map(
       (option) => `
       <div class="dropdown-item">
@@ -197,9 +201,6 @@ function renderFilterOptions(key) {
     `
     )
     .join("");
-
-  // Update the options container
-  optionsContainer.innerHTML = optionsHTML;
 
   // Add event listeners to checkboxes
   optionsContainer.querySelectorAll(".filter-checkbox").forEach((checkbox) => {
@@ -249,7 +250,7 @@ function addFilterEventListeners() {
       const key = e.target.id.replace("top-10-", "");
       const checked = e.target.checked;
       filters[key].forEach((option) => {
-        option.selected = preSelectedServices.includes(option.value) ? checked : false;
+        option.selected = checked && preSelectedServices.includes(option.value);
       });
       document.getElementById(`all-${key}`).checked = false; // Uncheck 'Select All'
       selectTopTeams();
@@ -260,17 +261,13 @@ function addFilterEventListeners() {
 
   // Prevent dropdown from closing on click inside
   document.querySelectorAll(".dropdown-menu").forEach((menu) => {
-    menu.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
+    menu.addEventListener("click", (e) => e.stopPropagation());
   });
 }
 
 // Function to select top teams based on selected services
 function selectTopTeams() {
-  const selectedServices = filters["Service"]
-    .filter((opt) => opt.selected)
-    .map((opt) => opt.value);
+  const selectedServices = filters["Service"].filter((opt) => opt.selected).map((opt) => opt.value);
 
   // Unselect all teams initially
   filters["Team"].forEach((option) => (option.selected = false));
@@ -295,13 +292,13 @@ function selectTopTeams() {
       teams
         .sort((a, b) => b[1] - a[1])
         .slice(0, 2)
-        .forEach(([team]) => topTeams.add(team));
+        .forEach(([teamName]) => topTeams.add(teamName));
     }
   }
 
   // Select only the top teams
   filters["Team"].forEach((option) => {
-    if (topTeams.has(option.value)) option.selected = true;
+    option.selected = topTeams.has(option.value);
   });
 
   // Re-render team options
@@ -311,11 +308,9 @@ function selectTopTeams() {
 // Function to filter incidents based on selected filters
 function filteredIncidents() {
   const selectedValues = {};
-  for (const key of filterKeys) {
-    selectedValues[key] = filters[key]
-      .filter((opt) => opt.selected)
-      .map((opt) => opt.value);
-  }
+  filterKeys.forEach((key) => {
+    selectedValues[key] = filters[key].filter((opt) => opt.selected).map((opt) => opt.value);
+  });
 
   return data.incidents.filter((row) =>
     filterKeys.every(
@@ -324,11 +319,27 @@ function filteredIncidents() {
   );
 }
 
-
 // Function to draw the Sankey diagram
 function drawSankey() {
   const incidents = filteredIncidents();
-  const graph = sankey($sankey, {
+
+  // Check if incidents are present
+  if (incidents.length === 0) {
+    $elements.sankey.innerHTML = `<div class="alert alert-info" role="alert">
+      No data available for the selected filters.
+    </div>`;
+    return;
+  }
+
+  // Create a mapping between Team Acro and Team Name
+  const teamAcroToName = {};
+  incidents.forEach((incident) => {
+    if (incident["Team Acro"] && incident["Team"]) {
+      teamAcroToName[incident["Team Acro"]] = incident["Team"];
+    }
+  });
+
+  const graph = sankey($elements.sankey, {
     data: incidents,
     labelWidth: 100,
     categories: ["Shift", "Region", "Team Acro", "Service"],
@@ -342,25 +353,33 @@ function drawSankey() {
   adjustHoursAndSize(graph.nodeData);
   adjustHoursAndSize(graph.linkData);
 
-  // Add tooltips
+  // Add tooltips with alternative Team names
   graph.nodes
     .attr("data-bs-toggle", "tooltip")
-    .attr("title", (d) => `${d.key}: ${num2(d.Hours)} hours`);
+    .attr("title", function (d) {
+      const teamFullName = teamAcroToName[d.key];
+      return teamFullName && teamFullName !== d.key
+        ? `${teamFullName}: ${num2(d.Hours)} hours`
+        : `${d.key}: ${num2(d.Hours)} hours`;
+    });
 
   graph.links
     .attr("data-bs-toggle", "tooltip")
     .attr("title", (d) => `${d.source.key} - ${d.target.key}: ${num2(d.Hours)} hours`);
 
   // Style text labels
-  graph.texts.attr("fill", "black");
+  graph.texts.attr("fill", "black").attr("font-size", "12px");
   colorSankey();
+
+  // Initialize Bootstrap tooltips
+  initializeTooltips();
 }
 
 // Function to adjust 'Hours' and 'size' properties for nodes and links
 function adjustHoursAndSize(items) {
   items.forEach((d) => {
-    const totalAdjustedHours = d3.sum(d.group, (d) => d.Hours * d.Count);
-    const totalCount = d3.sum(d.group, (d) => d.Count);
+    const totalAdjustedHours = d3.sum(d.group, (item) => item.Hours * item.Count);
+    const totalCount = d3.sum(d.group, (item) => item.Count);
     d.Hours = totalAdjustedHours / totalCount;
     d.size = totalCount;
   });
@@ -372,25 +391,24 @@ function updateColorScale() {
     .scaleLinear()
     .domain([minDuration, 2, threshold, 4, maxDuration])
     .range(["green", "green", "yellow", "red", "red"])
-    .interpolate(d3.interpolateLab)
     .clamp(true);
 }
 
 // Function to color the Sankey diagram based on 'Hours'
 function colorSankey() {
-  $thresholdDisplay.textContent = num2(threshold);
+  $elements.thresholdDisplay.textContent = num2(threshold);
   graphs.sankey.nodes.attr("fill", (d) => colorScale(d.Hours));
   graphs.sankey.links.attr("fill", (d) => colorScale(d.Hours));
 }
 
 // Event listener to toggle links in Sankey diagram
-$showLinks.addEventListener("change", () => {
-  graphs.sankey.links.classed("show", $showLinks.checked);
+$elements.showLinks.addEventListener("change", () => {
+  graphs.sankey.links.classed("show", $elements.showLinks.checked);
 });
 
 // Event listener for threshold slider
-$threshold.addEventListener("input", () => {
-  threshold = parseFloat($threshold.value);
+$elements.threshold.addEventListener("input", () => {
+  threshold = parseFloat($elements.threshold.value);
   updateColorScale();
   colorSankey();
 });
@@ -398,6 +416,14 @@ $threshold.addEventListener("input", () => {
 // Function to draw the network graph
 function drawNetwork() {
   const incidents = data.incidents;
+
+  // Check if incidents are present
+  if (incidents.length === 0) {
+    $elements.network.innerHTML = `<div class="alert alert-info" role="alert">
+      No data available for the selected filters.
+    </div>`;
+    return;
+  }
 
   // Calculate service statistics
   const serviceStats = d3.rollup(
@@ -419,17 +445,17 @@ function drawNetwork() {
   );
 
   // Assign statistics to nodes
-  for (const node of nodes) {
+  nodes.forEach((node) => {
     Object.assign(node, serviceStats.get(node.value) || { TotalHours: 0, Count: 0 });
     node.Hours = node.TotalHours / node.Count || 0;
-  }
+  });
 
   // Define forces for the network layout
   const forces = {
     charge: () => d3.forceManyBody().strength(-200),
   };
 
-  const graph = network($network, { nodes, links, forces, d3 });
+  const graph = network($elements.network, { nodes, links, forces, d3 });
   graphs.network = graph;
 
   // Define radius scale based on incident count
@@ -442,7 +468,7 @@ function drawNetwork() {
   graph.nodes
     .attr("fill", (d) => colorScale(d.Hours))
     .attr("stroke", "white")
-    .attr("stroke-width", 1)     
+    .attr("stroke-width", 1)
     .attr("r", (d) => rScale(d.Count))
     .attr("data-bs-toggle", "tooltip")
     .attr("title", (d) => `${d.value}: ${num2(d.Hours)} hours, ${num0(d.Count)} incidents`);
@@ -451,24 +477,21 @@ function drawNetwork() {
   graph.links
     .attr("marker-end", "url(#triangle)")
     .attr("stroke", "rgba(var(--bs-body-color-rgb), 0.2)");
+
+  // Initialize Bootstrap tooltips
+  initializeTooltips();
 }
 
-// Initialize tooltips for visualizations
-new bootstrap.Tooltip($sankey, { selector: "[data-bs-toggle='tooltip']" });
-new bootstrap.Tooltip($network, { selector: "[data-bs-toggle='tooltip']" });
-
 // Event listeners for buttons
-$summarize.addEventListener("click", summarize);
-$askQuestion.addEventListener("click", answerQuestion);
+$elements.summarize.addEventListener("click", summarize);
+$elements.askQuestion.addEventListener("click", answerQuestion);
 
 // Function to summarize data and display analysis
 async function summarize() {
-  const selectedServices = filters["Service"]
-    .filter((opt) => opt.selected)
-    .map((opt) => opt.value);
+  const selectedServices = filters["Service"].filter((opt) => opt.selected).map((opt) => opt.value);
 
   if (selectedServices.length === 0) {
-    $summary.innerHTML = `<div class="alert alert-warning" role="alert">
+    $elements.summary.innerHTML = `<div class="alert alert-warning" role="alert">
       No services selected for summarization.
     </div>`;
     return;
@@ -485,7 +508,7 @@ async function summarize() {
     // Calculate statistics
     const shiftStats = computeStats(serviceIncidents, "Shift");
     const timeOfDayStats = computeStats(serviceIncidents, "Time of Day");
-    const RegionStats = computeStats(serviceIncidents, "Region");
+    const regionStats = computeStats(serviceIncidents, "Region");
     const teamStats = computeStats(serviceIncidents, "Team");
 
     // Aggregate frequent issues
@@ -507,7 +530,7 @@ async function summarize() {
     serviceData[service] = {
       shiftStats,
       timeOfDayStats,
-      RegionStats,
+      regionStats,
       teamStats,
       descriptionStats,
       relatedServices,
@@ -527,11 +550,11 @@ async function summarize() {
   const system = `As an expert analyst in financial application's incident management, provide a structured and concise summary for the selected services, focusing on:
 
 1. **Overall Summary:**
-   - Identify overall problematic services, along with teams, Regions, and shifts (only top 2 or 3).
-   - Highlight services, teams, Regions, and shifts which are significantly beyond the threshold duration (only top 2 or 3).
+   - Identify overall problematic services, along with teams, regions, and shifts (only top 2 or 3).
+   - Highlight services, teams, regions, and shifts which are significantly beyond the threshold duration (only top 2 or 3).
 
 2. **Analysis:**
-   - Narrate a story flow linking services, teams, Regions, and shifts in 4 key points under the subheading 'Analysis'.
+   - Narrate a story flow linking services, teams, regions, and shifts in 4 key points under the subheading 'Analysis'.
 
 3. **Recommendations:**
    - Highlight connections with other services that might have impacted the problematic services.
@@ -544,10 +567,10 @@ Present the information concisely using bullet points under each section. Ensure
   // Prepare the message with aggregated data
   let message = `Selected Services:\n${selectedServices.join(", ")}\n\nOverall Summary:\n`;
 
-  // Append top problematic services, teams, Regions, and shifts
+  // Append top problematic services, teams, regions, and shifts
   message += formatTopStats("Problematic services", overallServiceStats, "Service");
   message += formatTopStats("Problematic teams", overallTeamStats, "Team");
-  message += formatTopStats("Problematic Regions", overallRegionStats, "Region");
+  message += formatTopStats("Problematic regions", overallRegionStats, "Region");
   message += formatTopStats("Problematic shifts", overallShiftStats, "Shift");
 
   // Append network data summary
@@ -563,7 +586,7 @@ Present the information concisely using bullet points under each section. Ensure
   }
 
   // Display a loading spinner
-  $summary.innerHTML = `<div class="spinner-border" role="status">
+  $elements.summary.innerHTML = `<div class="spinner-border" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>`;
 
@@ -590,12 +613,12 @@ Present the information concisely using bullet points under each section. Ensure
       if (content && content !== lastContent) {
         lastContent = content;
         fullContent = content;
-        $summary.innerHTML = marked.parse(fullContent);
+        $elements.summary.innerHTML = marked.parse(fullContent);
       }
     }
   } catch (error) {
     console.error("Error in summarize function:", error);
-    $summary.innerHTML = `<div class="alert alert-danger" role="alert">
+    $elements.summary.innerHTML = `<div class="alert alert-danger" role="alert">
       An error occurred while generating the summary: ${error.message}
     </div>`;
   }
@@ -603,15 +626,68 @@ Present the information concisely using bullet points under each section. Ensure
 
 // Function to answer user's question based on the data
 async function answerQuestion() {
-  const userQuestion = $userQuestion.value.trim();
+  const userQuestion = $elements.userQuestion.value.trim();
   if (!userQuestion) {
-    $summary.innerHTML = `<div class="alert alert-warning" role="alert">
+    $elements.summary.innerHTML = `<div class="alert alert-warning" role="alert">
       Please enter a question to ask.
     </div>`;
     return;
   }
 
   const incidents = filteredIncidents();
+
+  // Get selected services
+  const selectedServices = filters["Service"].filter((opt) => opt.selected).map((opt) => opt.value);
+
+  if (selectedServices.length === 0) {
+    $elements.summary.innerHTML = `<div class="alert alert-warning" role="alert">
+      No services selected.
+    </div>`;
+    return;
+  }
+
+  // Prepare serviceData as in summarize()
+  const serviceData = {};
+
+  // Prepare data for each selected service
+  for (const service of selectedServices) {
+    const serviceIncidents = incidents.filter((d) => d.Service === service);
+    if (serviceIncidents.length === 0) continue;
+
+    // Calculate statistics
+    const shiftStats = computeStats(serviceIncidents, "Shift");
+    const timeOfDayStats = computeStats(serviceIncidents, "Time of Day");
+    const regionStats = computeStats(serviceIncidents, "Region");
+    const teamStats = computeStats(serviceIncidents, "Team");
+
+    // Aggregate frequent issues
+    const descriptionStats = d3
+      .rollups(
+        serviceIncidents,
+        (v) => d3.sum(v, (d) => d.Count),
+        (d) => d.DescriptionCleaned
+      )
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([description, count]) => ({ Description: description, Count: count }));
+
+    // Identify related services from network data
+    const relatedServices = data.relations
+      .filter((rel) => rel.Source === service || rel.Target === service)
+      .map((rel) => (rel.Source === service ? rel.Target : rel.Source));
+
+    serviceData[service] = {
+      shiftStats,
+      timeOfDayStats,
+      regionStats,
+      teamStats,
+      descriptionStats,
+      relatedServices,
+    };
+  }
+
+  // Include Network Data in the Message
+  const networkSummary = prepareNetworkSummary(selectedServices);
 
   // Define the system message for the AI assistant
   const system = `As an expert analyst in financial application's incident management,
@@ -625,22 +701,25 @@ Present the information concisely and ensure that the answer is directly based o
   // Include overall statistics
   const overallStats = computeStats(incidents, "Service");
   overallStats.forEach((stat) => {
-    message += `- Service ${stat.Service}: ${stat.Count} incidents, Avg Duration: ${num2(
+    message += `- Service ${stat.Service}: ${num0(stat.Count)} incidents, Avg Duration: ${num2(
       stat.AvgHours
     )} hours\n`;
   });
 
+  // Append per-service summaries
+  for (const service of selectedServices) {
+    const data = serviceData[service];
+    if (!data) continue;
+
+    message += `\nService: ${service}\n`;
+    message += formatServiceStats(data);
+  }
+
   // Include network data summary
-  const selectedServices = filters["Service"]
-    .filter((opt) => opt.selected)
-    .map((opt) => opt.value);
-
-  const networkSummary = prepareNetworkSummary(selectedServices);
-
   message += `\nNetwork Data Summary:\n${networkSummary}\n`;
 
   // Display a loading spinner
-  $summary.innerHTML = `<div class="spinner-border" role="status">
+  $elements.summary.innerHTML = `<div class="spinner-border" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>`;
 
@@ -667,12 +746,12 @@ Present the information concisely and ensure that the answer is directly based o
       if (content && content !== lastContent) {
         lastContent = content;
         fullContent = content;
-        $summary.innerHTML = marked.parse(fullContent);
+        $elements.summary.innerHTML = marked.parse(fullContent);
       }
     }
   } catch (error) {
     console.error("Error in answerQuestion function:", error);
-    $summary.innerHTML = `<div class="alert alert-danger" role="alert">
+    $elements.summary.innerHTML = `<div class="alert alert-danger" role="alert">
       An error occurred while answering the question: ${error.message}
     </div>`;
   }
@@ -736,7 +815,7 @@ function formatServiceStats(data) {
       result += topTimesOfDay
         .map(
           (time) =>
-            `    ${time.TimeOfDay}: ${num0(time.Count)} incidents (Avg ${num2(
+            `    ${time["Time of Day"]}: ${num0(time.Count)} incidents (Avg ${num2(
               time.AvgHours
             )} hrs)`
         )
@@ -745,15 +824,15 @@ function formatServiceStats(data) {
     }
   }
 
-  // Problematic Regions
-  const topRegions = data.RegionStats.sort((a, b) => b.Count - a.Count).slice(0, 2);
+  // Problematic regions
+  const topRegions = data.regionStats.sort((a, b) => b.Count - a.Count).slice(0, 2);
   if (topRegions.length > 0) {
-    result += `- Problematic Regions:\n`;
+    result += `- Problematic regions:\n`;
     result += topRegions
       .map(
-        (Region) =>
-          `  ${Region.Region}: ${num0(Region.Count)} incidents (Avg ${num2(
-            Region.AvgHours
+        (region) =>
+          `  ${region.Region}: ${num0(region.Count)} incidents (Avg ${num2(
+            region.AvgHours
           )} hrs)`
       )
       .join("\n");
@@ -767,9 +846,7 @@ function formatServiceStats(data) {
     result += topTeams
       .map(
         (team) =>
-          `  ${team.Team}: ${num0(team.Count)} incidents (Avg ${num2(
-            team.AvgHours
-          )} hrs)`
+          `  ${team.Team}: ${num0(team.Count)} incidents (Avg ${num2(team.AvgHours)} hrs)`
       )
       .join("\n");
     result += "\n";
@@ -794,8 +871,7 @@ function formatServiceStats(data) {
 function prepareNetworkSummary(selectedServices) {
   // Filter network relations based on selected services
   const relevantRelations = data.relations.filter(
-    (rel) =>
-      selectedServices.includes(rel.Source) || selectedServices.includes(rel.Target)
+    (rel) => selectedServices.includes(rel.Source) || selectedServices.includes(rel.Target)
   );
 
   // Count the number of connections for each service
@@ -821,4 +897,21 @@ function prepareNetworkSummary(selectedServices) {
   }
 
   return summary;
+}
+
+// Function to initialize Bootstrap tooltips
+function initializeTooltips() {
+  // Dispose existing tooltips to prevent duplicates
+  const tooltipInstances = bootstrap.Tooltip.getInstance(document.body);
+  if (tooltipInstances) {
+    tooltipInstances.dispose();
+  }
+
+  // Initialize new tooltips
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  );
+  tooltipTriggerList.map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+  );
 }
